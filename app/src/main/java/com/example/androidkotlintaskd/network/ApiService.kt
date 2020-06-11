@@ -13,16 +13,13 @@ import retrofit2.http.GET
 object ApiService {
     private val END_POINT: String? = "https://www.thecocktaildb.com/api/json/v1/1/"
     private var drinksApi: DrinksApi
-    fun getData(): Observable<List<Drinks>>{
+    fun getData(): Observable<Drinks>{
         return drinksApi.allDrinks()
     }
 
     interface DrinksApi {
         @GET("filter.php?a=Alcoholic")
-        fun allDrinks(): Observable<List<Drinks>>
-
-//        @GET("lookup.php?i=")
-//        fun getDrinkById():
+        fun allDrinks(): Observable<Drinks>
     }
 
     init {
