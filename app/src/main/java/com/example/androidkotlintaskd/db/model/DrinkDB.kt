@@ -1,4 +1,4 @@
-package com.example.androidkotlintaskd.db
+package com.example.androidkotlintaskd.db.model
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
