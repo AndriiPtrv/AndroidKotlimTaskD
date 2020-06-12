@@ -5,7 +5,7 @@ import com.example.androidkotlintaskd.db.DrinkDataBase
 
 class App: Application() {
 
-    lateinit var db:DrinkDataBase
+    lateinit var db: DrinkDataBase
 
     override fun onCreate() {
         super.onCreate()

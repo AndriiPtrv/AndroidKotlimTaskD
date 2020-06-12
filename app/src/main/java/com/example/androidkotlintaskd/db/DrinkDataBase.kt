@@ -14,7 +14,7 @@ abstract class DrinkDataBase: RoomDatabase() {
         fun getInstance(context: Context) = Room.databaseBuilder(
             context.applicationContext,
             DrinkDataBase::class.java,
-            "Drinks"
+            "drinks"
         ).fallbackToDestructiveMigration()
             .allowMainThreadQueries()
             .build()

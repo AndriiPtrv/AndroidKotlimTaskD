@@ -16,14 +16,18 @@ import com.example.androidkotlintaskd.db.DrinkDB
 import com.example.androidkotlintaskd.network.ApiService
 import com.example.androidkotlintaskd.network.model.Drink
 import com.example.androidkotlintaskd.network.model.Drinks
+import io.reactivex.Flowable
 import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.fragment_list.*
 
 class ListFragment : Fragment() {
 
+    private var disposable: Disposable? = null
     private val drinkAdapter = DrinkAdapter()
-    private val dao = (activity as App).db.getDrinkDBDao() // ERROR
+    private val listFromServer = mutableListOf<Drink>()
+    private val listDB = mutableListOf<DrinkDB>()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -34,26 +38,43 @@ class ListFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
 
+        val dao = (activity?.application as App).db.getDrinkDBDao() // Объявлять тут!!!
+
         list_of_drinks.apply {
             layoutManager = LinearLayoutManager(activity)
             adapter = drinkAdapter
         }
 
-        val dis = ApiService.getData()
+        disposable = dao.selectDrink()
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
-            .subscribe(this::showListDrinks, this:: showError)
+            .subscribe({it ->
+                listDB.addAll(it)
+                showListDrinks(listDB)
+            },
+                {it -> showError(it)})
+
+        disposable = ApiService.getData()
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe({ it ->
+                listFromServer.addAll(it.drinks)
+                listFromServer.forEach {
+                    dao.insert(DrinkDB(0, it.strDrink, it.strDrinkThumb, it.idDrink))
+                }
+            }, { it -> showError(it) })
     }
 
-    private fun showListDrinks(drinks: Drinks) {
-       drinks.drinks.forEachIndexed { _, drink ->
-           dao.insert(DrinkDB(drink.idDrink.toLong(), drink.strDrink, drink.strDrinkThumb))
-       }
-        val list = dao.selectDrink()
+    private fun showListDrinks(list: MutableList<DrinkDB>) {
         drinkAdapter.update(list)
     }
 
     private fun showError(t: Throwable) {
         Toast.makeText(activity, "ERROR", Toast.LENGTH_SHORT).show()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        disposable?.dispose()
     }
 }
