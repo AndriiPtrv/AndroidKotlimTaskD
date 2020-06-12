@@ -83,4 +83,9 @@ class InfoFragment(private val id: String) : Fragment() {
     private fun showErrorSecond(t: Throwable) {
         Toast.makeText(activity, "ERROR (Second)", Toast.LENGTH_SHORT).show()
     }
+
+    override fun onStop() {
+        super.onStop()
+        disposable?.dispose()
+    }
 }
